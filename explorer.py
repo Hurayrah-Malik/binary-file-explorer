@@ -38,8 +38,12 @@ def hexdump(raw_bytes: bytes):
     column2_gen = get_hex_bytes(bytes_hex)
     column3_gen = printable_bytes(bytes_decimal)
 
-    # print the first line for now (while loop later)
-    for x in range(len(bytes_decimal) // 16):
+    # ceil division so the last partial row (< 16 bytes) is not cut off
+    import math
+
+    total_rows = math.ceil(len(bytes_decimal) / 16)
+
+    for x in range(total_rows):
         column1 = next(column1_gen)
         column2 = next(column2_gen)
         column3 = next(column3_gen)
@@ -57,11 +61,16 @@ def get_offset():
 
 # COLUMN 2
 # return the next row of bytes in hex
+# the row is split into two groups of 8 with a double space in the middle:
+# 48 65 6c 6c 6f 20 57 6f  72 6c 64 21 0a 00 00 00
 def get_hex_bytes(bytes_hex: list):
     start = 0
     end = 16
     while True:
-        yield " ".join(bytes_hex[start:end])
+        row = bytes_hex[start:end]
+        left = " ".join(row[:8])
+        right = " ".join(row[8:])
+        yield f"{left}  {right}"
         start += 16
         end += 16
 
